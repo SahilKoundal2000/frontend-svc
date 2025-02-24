@@ -1,0 +1,30 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_DEFAULT_REGION: "ca-central-1"
+      IMAGE_REPO_NAME: "pharmakart/authentication-svc"
+      AWS_ACCOUNT_ID: "719150847619"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image (Without Pushing)
+        run: |
+          echo "Building the Docker image..."
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          IMAGE_TAG=${COMMIT_HASH:-latest}
+          docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
