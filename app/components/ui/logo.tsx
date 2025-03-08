@@ -31,6 +31,7 @@ const Logo: React.FC<LogoProps> = ({ className, size = 150, variant }) => {
 
   return (
     <Image
+      className={className}
       src={logoSrc}
       alt="PharmaKart Logo"
       width={size * aspectRatio}
