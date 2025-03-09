@@ -116,3 +116,7 @@
     scroll-behavior: smooth;
   }
 }
+
+.auth-background {
+  background-image: url("/images/medicine-bg.png");
+}
