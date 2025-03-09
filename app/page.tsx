@@ -1,10 +1,27 @@
-import { Button } from "./components/ui/button";
-import Navbar from "./components/layout/navbar";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import Navbar from "@/components/layout/navbar";
+import Loading from "@/components/ui/loading";
+import { useAuth } from "@/context/authContext";
+import Link from "next/link";
 
 export default function Home() {
+  const { token, username, role } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <Loading />;
+  }
+
   return (
     <div className="font-sans text-gray-900">
-      <Navbar />
+      <Navbar username={username} role={role} />
 
       <section className="relative h-screen bg-black">
         <video
@@ -62,19 +79,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        id="login-signup"
-        className="py-16 bg-teal-400 text-white text-center"
-      >
-        <h2 className="text-3xl font-semibold mb-6">Join Us Today</h2>
-        <p className="text-lg mb-8">
-          Sign up or log in to start ordering your medicines online.
-        </p>
-        <div className="flex justify-center gap-6">
-          <Button>Login</Button>
-          <Button>Signup</Button>
-        </div>
-      </section>
+      {token ? (
+        <section
+          id="welcome"
+          className="py-16 bg-teal-400 text-white text-center"
+        >
+          <h2 className="text-3xl font-semibold mb-6">
+            Welcome back, {username}!
+          </h2>
+          <p className="text-lg mb-8">
+            Continue shopping and discover our latest offers.
+          </p>
+          <Button>Shop Now</Button>
+        </section>
+      ) : (
+        <section id="join" className="py-16 bg-teal-400 text-white text-center">
+          <h2 className="text-3xl font-semibold mb-6">Join Us Today</h2>
+          <p className="text-lg mb-8">
+            Sign up or log in to start ordering your medicines online.
+          </p>
+          <div className="flex justify-center gap-6">
+            <Link href="/auth">
+              <Button>Login / Signup</Button>
+            </Link>
+          </div>
+        </section>
+      )}
 
       <footer className="py-6 bg-teal-900 text-white text-center">
         <p>&copy; 2025 PharmaKart. All Rights Reserved.</p>
