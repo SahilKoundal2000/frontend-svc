@@ -118,5 +118,7 @@
 }
 
 .auth-background {
-  background-image: url("/images/medicine-bg.png");
+  background: #47575c;
+  background-image: url("/images/medicine.jpg");
+  background-size: cover;
 }
