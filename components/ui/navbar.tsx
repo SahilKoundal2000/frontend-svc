@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "../ui/logo";
-import { Button } from "../ui/button";
+import Logo from "./logo";
+import { Button } from "./button";
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -56,7 +56,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
           </Link>
 
           {role === "admin" ? (
-            <Link href="/admin/dashboard" className="hover:text-teal-800">
+            <Link href="/admin" className="hover:text-teal-800">
               Dashboard
             </Link>
           ) : (
