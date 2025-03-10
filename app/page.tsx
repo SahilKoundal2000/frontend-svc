@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/layout/navbar";
+import Navbar from "@/components/ui/navbar";
 import Loading from "@/components/ui/loading";
 import { useAuth } from "@/context/authContext";
 import Link from "next/link";
