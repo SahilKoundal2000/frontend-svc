@@ -36,9 +36,9 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+    <header className="fixed top-0 left-0 w-full bg-background text-foreground shadow-md z-10">
       <nav className="container mx-auto flex justify-between items-center py-4 px-6">
-        <Link href="/" className="text-xl font-bold text-teal-400">
+        <Link href="/">
           <Logo variant="rectangle" size={60} />
         </Link>
 
@@ -86,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/auth">
+            <Link href="/auth/login">
               <Button>Login / Signup</Button>
             </Link>
           )}

@@ -50,7 +50,7 @@ export default function Home() {
             payments, prescription uploads, and timely reminders for refills.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="bg-card p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold mb-4 text-teal-900">
                 Step 1: Browse & Order
               </h3>
@@ -59,7 +59,7 @@ export default function Home() {
                 cart.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="bg-card p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold mb-4 text-teal-900">
                 Step 2: Upload Prescription
               </h3>
@@ -67,7 +67,7 @@ export default function Home() {
                 Upload your prescription for medicines that require one.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="bg-card p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold mb-4 text-teal-900">
                 Step 3: Fast Delivery
               </h3>
