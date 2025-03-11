@@ -32,8 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
-          attribute="class"
+          scriptProps={{ "data-cfasync": "false" }}
           defaultTheme="system"
+          attribute="class"
           enableSystem
           disableTransitionOnChange
         >
