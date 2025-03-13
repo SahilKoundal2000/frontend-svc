@@ -4,103 +4,112 @@ import { useAuth } from "@/context/authContext";
 const API_VERSION = "/api/v1";
 
 export interface Product {
-  id?: string | number;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  [key: string]: any;
+    id?: string | number;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    [key: string]: any;
 }
 
 export interface StockUpdate {
-  stock: number;
+    stock: number;
 }
 
 export const useProductAPI = () => {
-  const { token } = useAuth();
+    const { token } = useAuth();
 
-  const getAuthHeaders = () => ({
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const addProduct = async (productData: Product & { image: File }) => {
-    const formData = new FormData();
-
-    Object.entries(productData).forEach(([key, value]) => {
-      formData.append(key, value instanceof File ? value : String(value));
+    const getAuthHeaders = () => ({
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     });
 
-    try {
-      const response = await axiosClient.post(
-        `${API_VERSION}/admin/products`,
-        formData,
-        {
-          ...getAuthHeaders(),
-          headers: {
-            ...getAuthHeaders().headers,
-            "Content-Type": "multipart/form-data",
-          },
+    const addProduct = async (productData: Product & { image: File }) => {
+        const formData = new FormData();
+
+        Object.entries(productData).forEach(([key, value]) => {
+            formData.append(key, value instanceof File ? value : String(value));
+        });
+
+        try {
+            const response = await axiosClient.post(
+                `${API_VERSION}/admin/products`,
+                formData,
+                {
+                    ...getAuthHeaders(),
+                    headers: {
+                        ...getAuthHeaders().headers,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            if (error.response && error.response.data) {
+                throw new Error(
+                    error.response.data.message || "Failed to add product."
+                );
+            }
+            throw new Error("Network error. Please try again.");
         }
-      );
-      return response.data;
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        throw new Error(
-          error.response.data.message || "Failed to add product."
+    };
+
+    const updateProduct = async (
+        id: string | number,
+        productData: Partial<Product>
+    ) => {
+        const response = await axiosClient.put(
+            `${API_VERSION}/admin/products/${id}`,
+            productData,
+            getAuthHeaders()
         );
-      }
-      throw new Error("Network error. Please try again.");
+        return response.data;
+    };
+
+    const deleteProduct = async (id: string | number) => {
+        const response = await axiosClient.delete(
+            `${API_VERSION}/admin/products/${id}`,
+            getAuthHeaders()
+        );
+        return response.data;
+    };
+
+    const updateProductStock = async (
+        id: string | number,
+        stockData: StockUpdate
+    ) => {
+        const response = await axiosClient.put(
+            `${API_VERSION}/admin/products/${id}/stock`,
+            stockData,
+            getAuthHeaders()
+        );
+        return response.data;
+    };
+
+    const getInventoryLogs = async (id: string | number) => {
+        const response = await axiosClient.get(
+            `${API_VERSION}/admin/products/${id}/logs`,
+            getAuthHeaders()
+        );
+        return response.data;
     }
-  };
 
-  const updateProduct = async (
-    id: string | number,
-    productData: Partial<Product>
-  ) => {
-    const response = await axiosClient.put(
-      `${API_VERSION}/admin/products/${id}`,
-      productData,
-      getAuthHeaders()
-    );
-    return response.data;
-  };
-
-  const deleteProduct = async (id: string | number) => {
-    const response = await axiosClient.delete(
-      `${API_VERSION}/admin/products/${id}`,
-      getAuthHeaders()
-    );
-    return response.data;
-  };
-
-  const updateProductStock = async (
-    id: string | number,
-    stockData: StockUpdate
-  ) => {
-    const response = await axiosClient.put(
-      `${API_VERSION}/admin/products/${id}/stock`,
-      stockData,
-      getAuthHeaders()
-    );
-    return response.data;
-  };
-
-  return {
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    updateProductStock,
-  };
+    return {
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        updateProductStock,
+        getInventoryLogs,
+    };
 };
 
 export const getAllProducts = async (params?: Record<string, any>) => {
-  const response = await axiosClient.get(`${API_VERSION}/products`, { params });
-  return response.data;
+    const response = await axiosClient.get(`${API_VERSION}/products`, { params });
+    return response.data;
 };
 
 export const getProductById = async (id: string | number) => {
-  const response = await axiosClient.get(`${API_VERSION}/products/${id}`);
-  return response.data;
+    const response = await axiosClient.get(`${API_VERSION}/products/${id}`);
+    return response.data;
 };
