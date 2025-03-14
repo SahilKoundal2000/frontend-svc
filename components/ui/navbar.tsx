@@ -93,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md flex flex-col w-full">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-background shadow-md flex flex-col w-full">
             <div className="flex flex-col p-4 space-y-4">
               <Link
                 href="/products"
@@ -162,7 +162,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
                   </button>
                 </div>
               ) : (
-                <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
+                <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Login / Signup</Button>
                 </Link>
               )}
