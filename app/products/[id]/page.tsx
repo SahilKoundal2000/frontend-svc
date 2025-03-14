@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/accordion";
 import MainLayout from "@/components/layout/main-layout";
 import Image from "next/image";
+import { useCart } from "@/context/cartContext";
 
 const SingleProductPage = () => {
   const { id } = useParams();
@@ -47,6 +48,7 @@ const SingleProductPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -69,7 +71,15 @@ const SingleProductPage = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    console.log(`Adding ${quantity} of ${product!.name} to cart`);
+    if (!product) return;
+    addItem({
+      id: product.id!.toString(),
+      name: product.name,
+      price: product.price,
+      quantity,
+      image_url: product.image_url,
+      requires_prescription: product.requires_prescription,
+    });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -83,38 +93,42 @@ const SingleProductPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-8">
-          <Skeleton className="h-10 w-40" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <Skeleton className="aspect-square rounded-xl" />
-          <div>
-            <Skeleton className="h-12 w-3/4 mb-4" />
-            <Skeleton className="h-8 w-1/4 mb-8" />
-            <Skeleton className="h-32 w-full mb-8" />
-            <Skeleton className="h-12 w-full mb-4" />
-            <Skeleton className="h-12 w-full" />
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <div className="mb-8">
+            <Skeleton className="h-10 w-40" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <Skeleton className="aspect-square rounded-xl" />
+            <div>
+              <Skeleton className="h-12 w-3/4 mb-4" />
+              <Skeleton className="h-8 w-1/4 mb-8" />
+              <Skeleton className="h-32 w-full mb-8" />
+              <Skeleton className="h-12 w-full mb-4" />
+              <Skeleton className="h-12 w-full" />
+            </div>
           </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/products")}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Products
-        </Button>
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </div>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/products")}
+            className="mb-6"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Products
+          </Button>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      </MainLayout>
     );
   }
 
@@ -372,9 +386,9 @@ const SingleProductPage = () => {
 
                 <div className="flex-grow flex gap-2">
                   <Button
-                    className="flex-grow h-12 text-base transition-all"
+                    className="flex-grow h-12 text-base transition-all select-none"
                     variant={addedToCart ? "outline" : "default"}
-                    disabled={!product.stock}
+                    disabled={!product.stock || addedToCart}
                     onClick={handleAddToCart}
                   >
                     {addedToCart ? (

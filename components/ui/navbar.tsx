@@ -5,8 +5,11 @@ import Logo from "./logo";
 import { Button } from "./button";
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import CartDropdown from "@/components/ui/cart-dropdown";
+import { useCart } from "@/context/cartContext";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
   const { logout } = useAuth();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { state: cart } = useCart();
 
   const handleLogout = () => {
     logout();
@@ -34,6 +38,11 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const itemCount = cart.items.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   return (
     <header className="fixed top-0 left-0 w-full bg-background text-foreground shadow-md z-10">
@@ -60,9 +69,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
               Dashboard
             </Link>
           ) : (
-            <Link href="/cart" className="hover:text-teal-800">
-              Cart
-            </Link>
+            <CartDropdown />
           )}
 
           {username ? (
@@ -112,13 +119,19 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
                   Dashboard
                 </Link>
               ) : (
-                <Link
-                  href="/cart"
-                  className="py-2 hover:text-teal-800"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Cart
-                </Link>
+                <div className="flex items-center py-2">
+                  <Link
+                    href="/cart"
+                    className="flex items-center hover:text-teal-800"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <ShoppingCart size={20} className="mr-2" />
+                    <span>Cart</span>
+                    {itemCount > 0 && (
+                      <Badge className="ml-2 bg-teal-600">{itemCount}</Badge>
+                    )}
+                  </Link>
+                </div>
               )}
 
               {username ? (
