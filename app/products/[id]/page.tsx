@@ -211,6 +211,9 @@ const SingleProductPage = () => {
                   <Image
                     src={product.image_url}
                     alt={product.name}
+                    width={400}
+                    height={400}
+                    objectFit="contain"
                     className="w-full h-full object-contain"
                   />
                 ) : (
