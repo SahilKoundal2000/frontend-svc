@@ -27,6 +27,7 @@ import MainLayout from "@/components/layout/main-layout";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useCart } from "@/context/cartContext";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -38,6 +39,7 @@ const ProductsPage = () => {
   const [error, setError] = useState<null | string>(null);
 
   const router = useRouter();
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -72,7 +74,14 @@ const ProductsPage = () => {
   }, [products, sortBy]);
 
   const handleAddToCart = (product: Product) => {
-    console.log("Adding to cart:", product);
+    addItem({
+      id: product.id!.toString(),
+      name: product.name,
+      image_url: product.image_url,
+      price: product.price,
+      quantity: 1,
+      requires_prescription: product.requires_prescription,
+    });
   };
 
   return (
