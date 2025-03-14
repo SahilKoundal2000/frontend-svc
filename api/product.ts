@@ -12,8 +12,17 @@ export interface Product {
     [key: string]: any;
 }
 
+export interface UpdateProduct {
+    id?: string | number;
+    name: string;
+    description: string;
+    price: number;
+    [key: string]: any;
+}
+
 export interface StockUpdate {
-    stock: number;
+    quantity_change: number;
+    reason: string;
 }
 
 export const useProductAPI = () => {
@@ -57,14 +66,36 @@ export const useProductAPI = () => {
 
     const updateProduct = async (
         id: string | number,
-        productData: Partial<Product>
+        productData: UpdateProduct & { image?: File | undefined }
     ) => {
-        const response = await axiosClient.put(
-            `${API_VERSION}/admin/products/${id}`,
-            productData,
-            getAuthHeaders()
-        );
-        return response.data;
+        const formData = new FormData();
+
+        Object.entries(productData).forEach(([key, value]) => {
+            formData.append(key, value instanceof File ? value : String(value));
+        });
+
+
+        try {
+            const response = await axiosClient.put(
+                `${API_VERSION}/admin/products/${id}`,
+                formData,
+                {
+                    ...getAuthHeaders(),
+                    headers: {
+                        ...getAuthHeaders().headers,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            if (error.response && error.response.data) {
+                throw new Error(
+                    error.response.data.message || "Failed to add product."
+                );
+            }
+            throw new Error("Network error. Please try again.");
+        }
     };
 
     const deleteProduct = async (id: string | number) => {

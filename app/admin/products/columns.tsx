@@ -15,6 +15,16 @@ import {
 import Image from "next/image";
 
 import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -26,19 +36,17 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from
+    "@/components/ui/select";
 
-export type Product = {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    image_url: string;
-    requires_prescription: boolean;
-};
+import { Product, StockUpdate } from "@/api/product";
+import { toast } from "sonner";
 
 export const getColumns = (
-    onDeleteProduct: (productId: string) => void
+    onDeleteProduct: (productId: string) => void,
+    onUpdateStock: (productId: string, stockUpdate: StockUpdate) => void
 ): ColumnDef<Product>[] => [
         {
             accessorKey: "image_url",
@@ -132,33 +140,92 @@ export const getColumns = (
 
                 return (
                     <AlertDialog>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id)}
-                                >
-                                    Copy product ID
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>
-                                    Manage Stock
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <Link href={"/admin/products/inventory/" + product.id}>View Inventory</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>Update Product</DropdownMenuItem>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem>Delete Product</DropdownMenuItem>
-                                </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Dialog>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <span className="sr-only">Open menu</span>
+                                        <MoreHorizontal />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id!.toString())}
+                                    >
+                                        Copy product ID
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DialogTrigger asChild>
+                                        <DropdownMenuItem>Update Stock</DropdownMenuItem>
+                                    </DialogTrigger>
+                                    <DropdownMenuItem>
+                                        <Link href={"/admin/products/" + product.id + "/logs"}>View Inventory</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem>
+                                        <Link href={"/admin/products/" + product.id + "/update"}>Update Product</Link>
+                                    </DropdownMenuItem>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem>Delete Product</DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <DialogContent className="sm:max-w-[425px]">
+
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.target as HTMLFormElement);
+                                    const quantity_change = parseInt(formData.get("quantity_change") as string);
+                                    const reason = formData.get("reason") as string;
+                                    if (quantity_change === 0 || isNaN(quantity_change)) {
+                                        {
+                                            toast("Invalid Quantity Value", { description: "Quantity cannot be 0 or empty" });
+                                            return;
+                                        }
+                                    }
+                                    onUpdateStock(product.id!.toString(), { quantity_change, reason });
+                                }}>
+                                    <DialogHeader>
+                                        <DialogTitle>Update Stock</DialogTitle>
+                                        <DialogDescription>
+                                            Update the stock for the product.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="quantity">Stock Change</Label>
+
+                                            <Input
+                                                id="quantity"
+                                                className="w-[280px]"
+                                                type="number"
+                                                name="quantity_change"
+                                                min={0}
+                                                placeholder="Enter quantity"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="reason">Change Reason</Label>
+
+                                            <Select name="reason">
+                                                <SelectTrigger className="w-[280px]" id="reason">
+                                                    <SelectValue placeholder="Select change reason" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Change Reason</SelectLabel>
+                                                        <SelectItem value="stock_added">Restock</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="submit">Save changes</Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -169,7 +236,7 @@ export const getColumns = (
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => onDeleteProduct(product.id)}>
+                                <AlertDialogAction onClick={() => onDeleteProduct(product.id!.toString())}>
                                     Continue
                                 </AlertDialogAction>
                             </AlertDialogFooter>
