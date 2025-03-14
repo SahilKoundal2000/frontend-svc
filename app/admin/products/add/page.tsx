@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductAPI } from "@/api/product";
+import { useRef } from "react";
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -52,6 +53,7 @@ const FormSchema = z.object({
 });
 
 export default function AddProductPage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { addProduct } = useProductAPI();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -68,6 +70,10 @@ export default function AddProductPage() {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       await addProduct(data);
+      form.reset();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       toast.success("Product added successfully!");
     } catch (error: unknown) {
       const errorMessage =
@@ -181,6 +187,7 @@ export default function AddProductPage() {
                   <FormLabel>Product Image</FormLabel>
                   <FormControl>
                     <Input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       onChange={(e) => {

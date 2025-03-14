@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Product, getColumns } from "./columns";
+import { getColumns } from "./columns";
 import { DataTable } from "./data-table";
-import { getAllProducts, useProductAPI } from "@/api/product";
+import { Product, getAllProducts, useProductAPI } from "@/api/product";
 import Loading from "@/components/ui/loading";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 interface ProductsResponse {
   limit: number;
@@ -18,7 +20,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
-  const { deleteProduct } = useProductAPI();
+  const { deleteProduct, updateProductStock } = useProductAPI();
 
   useEffect(() => {
     setIsMounted(true);
@@ -41,12 +43,44 @@ export default function ProductsPage() {
 
   if (loading) return <Loading />;
 
-  const columns = getColumns((id) => {
-    deleteProduct(id);
+  const columns = getColumns(async (id) => {
+    const resp = await deleteProduct(id);
+    if (!resp) return;
+    if (resp.error) {
+      toast("Failed to delete product.", { description: resp.error.message });
+      return;
+    }
     setProducts((prevProducts) =>
       prevProducts.filter((product) => product.id !== id)
     );
-  });
+  },
+    async (id, StockUpdate) => {
+      try {
+        await updateProductStock(id, StockUpdate);
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product.id === id ? { ...product, stock: product.stock + StockUpdate.quantity_change } : product
+          )
+        );
+      } catch (error: unknown) {
+        console.error("Failed to update stock:", error);
+        if (error instanceof AxiosError) {
+          const errorMessage = error.response?.data;
+
+          if (errorMessage.type === "VALIDATION_ERROR") {
+            const validationErrors = Object.entries(errorMessage.details)
+              .map(([field, message]) => `${field}: ${message}`)
+              .join(", ");
+            toast("Validation Failed for following fields:", { description: validationErrors });
+          }
+          else {
+            toast("Failed to update stock.", { description: error.response?.data.message || "An unknown error occurred." });
+          }
+        } else {
+          toast("Failed to update stock.", { description: "An unknown error occurred." });
+        }
+      }
+    });
 
   return (
     <div className="container mx-auto py-10">
