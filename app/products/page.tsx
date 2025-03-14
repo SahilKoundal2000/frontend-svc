@@ -149,6 +149,9 @@ const ProductsPage = () => {
                       <Image
                         src={product.image_url}
                         alt={product.name}
+                        width={200}
+                        height={200}
+                        objectFit="contain"
                         className="h-full w-full object-cover"
                       />
                     ) : (
