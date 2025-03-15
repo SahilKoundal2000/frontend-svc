@@ -83,7 +83,9 @@ const Navbar: React.FC<NavbarProps> = ({ username, role }: NavbarProps) => {
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 {role === "customer" && (
                   <>
-                    <DropdownMenuItem>Orders</DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/orders">Orders</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Reminders</DropdownMenuItem>
                   </>
                 )}

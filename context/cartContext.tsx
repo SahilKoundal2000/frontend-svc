@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 
-// Define types
 export interface CartItem {
   id: string;
   name: string;
@@ -31,10 +30,8 @@ interface CartContextType {
   clearCart: () => void;
 }
 
-// Create context
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Reducer function
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_ITEM": {
@@ -43,7 +40,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       );
 
       if (existingItemIndex >= 0) {
-        // Item exists, update quantity
         const updatedItems = [...state.items];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
@@ -57,7 +53,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           total: calculateTotal(updatedItems),
         };
       } else {
-        // New item, add to cart
         const updatedItems = [...state.items, action.payload];
         return {
           ...state,
@@ -81,7 +76,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "UPDATE_QUANTITY": {
       const { id, quantity } = action.payload;
       if (quantity <= 0) {
-        // Remove item if quantity is 0 or negative
         return cartReducer(state, { type: "REMOVE_ITEM", payload: id });
       }
 
@@ -107,12 +101,10 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   }
 };
 
-// Helper to calculate total
 const calculateTotal = (items: CartItem[]): number => {
   return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 };
 
-// Provider component
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -123,7 +115,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  // Load cart from localStorage on initial render
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -135,12 +126,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state));
   }, [state]);
 
-  // Action functions
   const addItem = (item: CartItem) => {
     dispatch({ type: "ADD_ITEM", payload: item });
   };
@@ -172,7 +161,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Custom hook to use the cart context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (context === undefined) {

@@ -29,7 +29,6 @@ import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Loading from "@/components/ui/loading";
 
-// Modified schema to make image optional for updates
 const FormSchema = z.object({
   name: z.string().min(2, {
     message: "Product name must be at least 2 characters.",
@@ -79,7 +78,6 @@ export default function UpdateProductPage() {
         const response = await getProductById(productId);
         console.log("API Response:", response);
 
-        // Extract product data from the response
         const productData = response;
 
         if (!productData) {
@@ -88,13 +86,11 @@ export default function UpdateProductPage() {
 
         console.log("Using product data:", productData);
 
-        // Reset form with product data
         form.reset({
           name: productData.name,
           description: productData.description,
           price: productData.price,
           requires_prescription: productData.requires_prescription || false,
-          // Image will be handled separately as it's a file input
         });
       } catch (error) {
         console.error("Failed to fetch product:", error);

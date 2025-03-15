@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
-import { Search, Filter, Pill, FileText } from "lucide-react";
+import { Search, Filter, Pill, FileText, Check } from "lucide-react";
 import { getAllProducts, Product } from "@/api/product";
 import {
   Card,
@@ -28,8 +28,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/cartContext";
+import { toast } from "sonner";
 
-const ProductsPage = () => {
+export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +38,7 @@ const ProductsPage = () => {
   const [sortBy, setSortBy] = useState("name");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<null | string>(null);
+  const [addingToCart, setAddingToCart] = useState<Record<string, boolean>>({});
 
   const router = useRouter();
   const { addItem } = useCart();
@@ -74,6 +76,8 @@ const ProductsPage = () => {
   }, [products, sortBy]);
 
   const handleAddToCart = (product: Product) => {
+    setAddingToCart((prev) => ({ ...prev, [product.id!]: true }));
+
     addItem({
       id: product.id!.toString(),
       name: product.name,
@@ -82,6 +86,14 @@ const ProductsPage = () => {
       quantity: 1,
       requires_prescription: product.requires_prescription,
     });
+
+    toast("Added to cart", {
+      description: `${product.name} has been added to your cart`,
+    });
+
+    setTimeout(() => {
+      setAddingToCart((prev) => ({ ...prev, [product.id!]: false }));
+    }, 1500);
   };
 
   return (
@@ -210,10 +222,16 @@ const ProductsPage = () => {
                 <CardFooter className="pt-0">
                   <Button
                     className="w-full"
-                    disabled={product.stock <= 0}
+                    disabled={product.stock <= 0 || addingToCart[product.id!]}
                     onClick={() => handleAddToCart(product)}
                   >
-                    Add to Cart
+                    {addingToCart[product.id!] ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" /> Added!
+                      </>
+                    ) : (
+                      "Add to Cart"
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
@@ -230,6 +248,4 @@ const ProductsPage = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default ProductsPage;
+}

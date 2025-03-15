@@ -192,7 +192,7 @@ export default function AddProductPage() {
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        onChange(file); // Pass file to react-hook-form
+                        onChange(file);
                       }}
                     />
                   </FormControl>
