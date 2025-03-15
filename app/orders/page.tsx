@@ -74,6 +74,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const statusColorMap: Record<string, string> = {
   payment_pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
@@ -133,7 +134,7 @@ export default function CustomerOrdersPage() {
   const filterForm = useForm({
     defaultValues: {
       filterColumn: "",
-      filterOperator: "eq",
+      filterOperator: "",
       filterValue: "",
     },
   });
@@ -506,10 +507,30 @@ export default function CustomerOrdersPage() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="eq">Equals</SelectItem>
-                                <SelectItem value="gt">Greater than</SelectItem>
-                                <SelectItem value="lt">Less than</SelectItem>
-                                <SelectItem value="ilike">Contains</SelectItem>
+                                {filterForm.getValues("filterColumn") !==
+                                "created_at" ? (
+                                  <>
+                                    <SelectItem value="eq">Equals</SelectItem>
+                                    <SelectItem value="gt">
+                                      Greater than
+                                    </SelectItem>
+                                    <SelectItem value="lt">
+                                      Less than
+                                    </SelectItem>
+                                    <SelectItem value="ilike">
+                                      Contains
+                                    </SelectItem>
+                                  </>
+                                ) : (
+                                  <>
+                                    <SelectItem value="gt">
+                                      Greater than
+                                    </SelectItem>
+                                    <SelectItem value="lt">
+                                      Less than
+                                    </SelectItem>
+                                  </>
+                                )}
                               </SelectContent>
                             </Select>
                           </FormItem>
@@ -523,7 +544,12 @@ export default function CustomerOrdersPage() {
                           <FormItem>
                             <FormLabel>Value</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter value" {...field} />
+                              {filterForm.getValues("filterColumn") ===
+                              "created_at" ? (
+                                <DatePicker {...field} />
+                              ) : (
+                                <Input {...field} placeholder="Enter value" />
+                              )}
                             </FormControl>
                           </FormItem>
                         )}
