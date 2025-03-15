@@ -41,6 +41,14 @@ import { toast } from "sonner";
 import MainLayout from "@/components/layout/main-layout";
 import Loading from "@/components/ui/loading";
 import { AxiosError } from "axios";
+import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
@@ -51,6 +59,7 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openPrescription, setOpenPrescription] = useState(false);
 
   const fetchOrderDetails = useCallback(async () => {
     setLoading(true);
@@ -433,15 +442,86 @@ export default function OrderDetailsPage() {
             <CardContent>
               {order.prescription_url ? (
                 <div className="space-y-4">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      window.open(order.prescription_url, "_blank")
-                    }
-                    className="w-full"
+                  <div className="border rounded-md overflow-hidden">
+                    {order.prescription_url.toLowerCase().endsWith(".pdf") ? (
+                      <iframe
+                        src={`${order.prescription_url}#toolbar=0&navpanes=0`}
+                        title="Prescription PDF"
+                        className="w-full h-40 border-none"
+                        onError={(e) => {
+                          const container = e.currentTarget.parentElement;
+                          if (container) {
+                            const fallbackElement =
+                              document.createElement("div");
+                            fallbackElement.className =
+                              "flex items-center justify-center h-40 bg-gray-100";
+                            fallbackElement.innerHTML =
+                              '<div class="flex flex-col items-center justify-center"><FileText class="h-10 w-10 text-gray-400" /><p class="mt-2 text-gray-500">PDF Preview Unavailable</p></div>';
+                            container.replaceChild(
+                              fallbackElement,
+                              e.currentTarget
+                            );
+                          }
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        src={order.prescription_url}
+                        alt="Prescription"
+                        width={400}
+                        height={300}
+                        objectFit="cover"
+                        className="w-full h-auto max-h-40 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/api/placeholder/400/300";
+                          e.currentTarget.alt =
+                            "Prescription (Cannot be displayed)";
+                        }}
+                      />
+                    )}
+                  </div>
+                  <Dialog
+                    open={openPrescription}
+                    onOpenChange={setOpenPrescription}
                   >
-                    Download Prescription
-                  </Button>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                        View Full Prescription
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl w-full max-h-screen overflow-auto">
+                      <DialogHeader>
+                        <DialogTitle>Prescription</DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        {order.prescription_url
+                          .toLowerCase()
+                          .endsWith(".pdf") ? (
+                          <iframe
+                            src={`${order.prescription_url}#toolbar=1&navpanes=1`}
+                            title="Prescription PDF"
+                            className="w-full h-screen max-h-[70vh] border-none"
+                          />
+                        ) : (
+                          <div className="flex justify-center">
+                            <Image
+                              src={order.prescription_url}
+                              alt="Prescription"
+                              width={800}
+                              height={600}
+                              className="max-h-[70vh] w-auto object-contain"
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  "/api/placeholder/800/600";
+                                e.currentTarget.alt =
+                                  "Prescription (Cannot be displayed)";
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ) : (
                 <p className="text-gray-500">No prescription uploaded</p>
