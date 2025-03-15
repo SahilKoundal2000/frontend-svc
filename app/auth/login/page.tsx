@@ -46,7 +46,6 @@ export default function LoginForm() {
     },
   });
 
-  // Reset form validation errors when user modifies fields
   useEffect(() => {
     const subscription = form.watch(() => {
       form.clearErrors();
@@ -54,7 +53,6 @@ export default function LoginForm() {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  // Set form error when loginError is updated
   useEffect(() => {
     if (loginError) {
       form.setError("root", {

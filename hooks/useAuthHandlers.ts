@@ -20,12 +20,10 @@ export const useLoginHandler = () => {
 
     try {
       const response = await login(identifier, password);
-      // Assuming login returns a success indicator or throws on failure
       router.push("/");
       setIsLoggingIn(false);
-      return true; // Success indicator
+      return true;
     } catch (error: any) {
-      // Handle different error formats
       let errorMessage = "Login failed. Please check your credentials.";
 
       if (error.response && error.response.data) {
@@ -40,7 +38,7 @@ export const useLoginHandler = () => {
 
       setLoginError(errorMessage);
       setIsLoggingIn(false);
-      return false; // Failure indicator
+      return false;
     }
   };
 
@@ -66,15 +64,12 @@ export const useRegisterHandler = () => {
       setIsRegistering(false);
       return true;
     } catch (error: any) {
-      // Default error message
       let errorMessage = "Registration failed. Please try again.";
 
-      // Check for structured validation errors
       if (
         error.response?.data?.type === "VALIDATION_ERROR" &&
         error.response?.data?.details
       ) {
-        // Extract field-specific errors
         setFieldErrors(error.response.data.details);
         errorMessage = "Validation error. Please check all fields.";
       } else if (error.response && error.response.data) {

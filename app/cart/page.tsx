@@ -31,15 +31,18 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MainLayout from "@/components/layout/main-layout";
 import { toast } from "sonner";
+import { useOrderAPI } from "@/api/order";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { state: cart, updateQuantity, removeItem, clearCart } = useCart();
   const { token } = useAuth();
+  const { placeOrder } = useOrderAPI();
+
+  const router = useRouter();
+
   const [isOrdering, setIsOrdering] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
-  const [promoApplied, setPromoApplied] = useState(false);
-  const [discount, setDiscount] = useState(0);
-  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
+  const [prescriptionFile, setPrescriptionFile] = useState<File | undefined>();
   const [prescriptionFileName, setPrescriptionFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,22 +63,6 @@ export default function CartPage() {
 
   const handleRemoveItem = (id: string) => {
     removeItem(id);
-  };
-
-  const applyPromoCode = () => {
-    if (promoCode.toLowerCase() === "discount10") {
-      const discountAmount = cart.total * 0.1;
-      setDiscount(discountAmount);
-      setPromoApplied(true);
-      toast("Promo code applied", {
-        description: "10% discount has been applied to your order.",
-      });
-    } else {
-      toast("Invalid promo code", {
-        description: "The promo code you entered is invalid or expired.",
-        richColors: true,
-      });
-    }
   };
 
   const handlePrescriptionUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +94,7 @@ export default function CartPage() {
   };
 
   const handleRemovePrescription = () => {
-    setPrescriptionFile(null);
+    setPrescriptionFile(undefined);
     setPrescriptionFileName("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -128,7 +115,7 @@ export default function CartPage() {
     }
   };
 
-  const handleOrderNow = () => {
+  const handleOrderNow = async () => {
     if (!isAuthenticated) {
       toast("Authentication required", {
         description: "Please log in to complete your order.",
@@ -153,17 +140,37 @@ export default function CartPage() {
       return;
     }
 
-    // TODO: Implement order processing logic
-    setTimeout(() => {
+    const orderData = {
+      items: cart.items.map((item) => ({
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+      })),
+      prescription: prescriptionFile,
+    };
+
+    try {
+      const resp = await placeOrder(orderData);
       clearCart();
-      setPrescriptionFile(null);
+      setPrescriptionFile(undefined);
       setPrescriptionFileName("");
       setIsOrdering(false);
+      router.push(resp.payment_url);
       toast("Order placed successfully!", {
         description:
-          "Your order has been placed and will be processed shortly.",
+          "Your order has been placed. Continue with the payment to complete the process.",
       });
-    }, 1500);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.";
+
+      toast.error("Error placing order", {
+        description: errorMessage,
+      });
+      setIsOrdering(false);
+    }
   };
 
   const itemCount = cart.items.reduce(
@@ -171,8 +178,8 @@ export default function CartPage() {
     0
   );
   const subtotal = cart.total;
-  const shippingCost = subtotal > 100 ? 0 : 10;
-  const total = subtotal - discount + shippingCost;
+  const shippingCost = subtotal > 40 ? 0 : 10;
+  const total = subtotal + shippingCost;
 
   const hasPrescriptionItems = cart.items.some(
     (item) => item.requires_prescription
@@ -346,13 +353,6 @@ export default function CartPage() {
                   <span>{formatPrice(subtotal)}</span>
                 </div>
 
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>-{formatPrice(discount)}</span>
-                  </div>
-                )}
-
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
                   <span>
@@ -391,29 +391,6 @@ export default function CartPage() {
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total</span>
                   <span>{formatPrice(total)}</span>
-                </div>
-
-                <div className="pt-2">
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      disabled={promoApplied}
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={applyPromoCode}
-                      disabled={promoApplied || !promoCode}
-                    >
-                      Apply
-                    </Button>
-                  </div>
-                  {promoApplied && (
-                    <p className="text-green-600 text-sm mt-1">
-                      Promo code applied successfully!
-                    </p>
-                  )}
                 </div>
 
                 <Input

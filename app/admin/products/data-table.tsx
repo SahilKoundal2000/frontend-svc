@@ -27,7 +27,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import React from "react";
-import { DataTablePagination } from "@/components/ui/pagination";
+import { DataTablePagination } from "@/components/ui/dt-pagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
