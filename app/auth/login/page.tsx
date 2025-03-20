@@ -124,7 +124,7 @@ export default function LoginForm() {
                 {isLoggingIn ? "Logging in..." : "Login"}
               </Button>
               <div className="text-sm ml-2">
-                Don&apos;t have an account?{" "}
+                Don&apos;t have an accounts?{" "}
                 <Link
                   href="/auth/signup"
                   className="underline underline-offset-4"
